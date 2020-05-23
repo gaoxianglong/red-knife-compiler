@@ -68,7 +68,7 @@ public class Main {
         var files = file.listFiles();
         Stream.of(files).forEach(x -> {
             if (x.isFile()) {
-                if (x.getName().endsWith(Constants.SOURCE_CODE_FILE_POSTFIX)) {
+                if (x.getName().endsWith(Constants.SOURCE_CODE_FILE_POSTFIX)) {//只加载指定后缀的文件
                     sourceFiles.add(x);
                 }
             } else {

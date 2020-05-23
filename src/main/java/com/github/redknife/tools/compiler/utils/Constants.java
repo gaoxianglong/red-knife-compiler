@@ -29,7 +29,7 @@ import java.util.UUID;
  */
 public class Constants {
     public final static String FILE_ENCODING = System.getProperty("file.encoding");
-    public final static String SOURCE_CODE_FILE_POSTFIX = ".c";
+    public final static String SOURCE_CODE_FILE_POSTFIX = ".rk";
     public final static String OUTPUT_PATH = System.getProperty("java.io.tmpdir");
     public final static String OS_NAME = System.getProperty("os.name");
     public final static String COPYRIGHT = "gao_xianglong@sina.com";

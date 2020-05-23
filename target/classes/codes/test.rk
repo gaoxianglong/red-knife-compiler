@@ -1,4 +1,4 @@
-int v1 = 100;
+int value = 10;
 void main(){
     int v2 = 10+5*(100+2)/2;
     int v3 = v1+v2/10;
@@ -13,12 +13,11 @@ void main(){
     }else{
          print("3");
     }
-    print("Hello World");
-    a.b.c("test");
+    println("Hello World");
     for(int i=0;i<10;i++){
         if(i==5){print(i);}
         for(int j=0;j<i;j++){
-            print(j);
+            println(j);
         }
     }
 }
@@ -26,4 +25,3 @@ void main(){
 void methodTest(){
     print("Hello World!!!");
 }
-

@@ -28,7 +28,7 @@ import java.util.Objects;
 /**
  * red-knife-compiler语法分析器
  * <p>
- * 上下文无关文法如下：
+ * 上下文无关文法如下：  variableDecl
  * <p>
  * parse -> variableDecl methodDecl
  * methodDecl -> 'void' id '()' block
@@ -87,14 +87,18 @@ public class RedKnifeParser implements Parser {
         while (true) {
             nextToken();
             if (Objects.isNull(token)) break;
+            var begin = token.pos;
             prevToken();
-            var child = methodDecl(); //解析方法声明
-            if (Objects.nonNull(child)) {
-                classDeclChilds.add(child);
+            var c1 = methodDecl();
+            if (Objects.nonNull(c1)) {
+                classDeclChilds.add(c1);
             }
-            child = variableDecl();//解析变量声明
-            if (Objects.nonNull(child)) {
-                classDeclChilds.add(child);
+            var c2 = variableDecl();
+            if (Objects.nonNull(c2)) {
+                classDeclChilds.add(c2);
+            }
+            if (Objects.isNull(c1) && Objects.isNull(c2)) {
+                error(begin);//当方法体外围不满足语法规范时抛出异常
             }
         }
         compilationUnit.getChilds().add(classDecl);
@@ -130,7 +134,9 @@ public class RedKnifeParser implements Parser {
                         }
                         while (true) {//解析else-if语句
                             var temp = nextToken();
-                            if (isTokenKind(Token.TokenKind.ELSE)) {
+                            if (Objects.isNull(temp)) {
+                                error(begin);
+                            } else if (isTokenKind(Token.TokenKind.ELSE)) {
                                 nextToken();
                                 if (isTokenKind(Token.TokenKind.IF)) {
                                     nextToken();
@@ -165,7 +171,9 @@ public class RedKnifeParser implements Parser {
                             }
                         }
                         nextToken();
-                        if (isTokenKind(Token.TokenKind.ELSE)) {
+                        if (Objects.isNull(token)) {
+                            error(begin);
+                        } else if (isTokenKind(Token.TokenKind.ELSE)) {
                             var else_ = new If(Tree.Tag.ELSE);
                             child = block(begin);
                             if (Objects.nonNull(child)) {
@@ -198,6 +206,9 @@ public class RedKnifeParser implements Parser {
      */
     private Tree forDecl() throws Throwable {
         nextToken();
+        if (Objects.isNull(token)) {
+            return null;
+        }
         var begin = token.pos;
         if (isTokenKind(Token.TokenKind.FOR)) {
             nextToken();
@@ -306,12 +317,11 @@ public class RedKnifeParser implements Parser {
                         var child = block(begin);
                         if (Objects.nonNull(child)) {
                             result.getChilds().add(child);
-                            return result;
                         }
+                        return result;
                     } else {
                         error(begin);
                     }
-                } else {
                     error(begin);
                 }
             } else {
@@ -332,43 +342,46 @@ public class RedKnifeParser implements Parser {
      */
     private Tree block(int begin) throws Throwable {
         nextToken();
-        if (isTokenKind(Token.TokenKind.LBRACE)) {
+        if (Objects.isNull(token)) {
+            return null;
+        } else if (isTokenKind(Token.TokenKind.LBRACE)) {
             var result = new Block(Tree.Tag.NO_TAG);
             var childs = result.getChilds();
             while (true) {
-                Tree child = variableDecl();//解析字段声明
-                if (Objects.nonNull(child)) {
-                    childs.add(child);
+                var c1 = variableDecl();//解析字段声明
+                if (Objects.nonNull(c1)) {
+                    childs.add(c1);
                 }
-                child = expressionStatement(begin);//解析表达式语句
-                if (Objects.nonNull(child)) {
+                var c2 = expressionStatement(begin);//解析表达式语句
+                if (Objects.nonNull(c2)) {
                     nextToken();
                     if (isTokenKind(Token.TokenKind.SEMI)) {
-                        childs.add(child);
+                        childs.add(c2);
                     } else {
                         error(begin);
                     }
                 }
-                child = forDecl();//解析for循环语句声明
-                if (Objects.nonNull(child)) {
-                    childs.add(child);
+                var c3 = forDecl();//解析for循环语句声明
+                if (Objects.nonNull(c3)) {
+                    childs.add(c3);
                 }
-                child = ifDecl();//解析if流程控制语句
-                if (Objects.nonNull(child)) {
-                    childs.add(child);
+                var c4 = ifDecl();//解析if流程控制语句
+                if (Objects.nonNull(c4)) {
+                    childs.add(c4);
                 }
                 nextToken();
                 if (Objects.isNull(token)) {
                     error(begin);
-                    break;
-                } else if (isTokenKind(Token.TokenKind.RBRACE)) {
+                } else if (isTokenKind(Token.TokenKind.RBRACE)) {//允许方法体为空
                     return result;
                 } else {
+                    if (Objects.isNull(c1) && Objects.isNull(c2) &&
+                            Objects.isNull(c3) && Objects.isNull(c4)) {
+                        error(begin);//不满足语法规范时抛出异常
+                    }
                     prevToken();
                 }
             }
-        } else {
-            error(begin);
         }
         return null;
     }
@@ -545,7 +558,9 @@ public class RedKnifeParser implements Parser {
      */
     private Tree primary(int begin) throws Throwable {
         nextToken();
-        if (isTokenKind(Token.TokenKind.IDENTIFIER)) {
+        if (Objects.isNull(token)) {
+            return null;
+        } else if (isTokenKind(Token.TokenKind.IDENTIFIER)) {
             return new Ident(Tree.Tag.NO_TAG, getMorpheme());
         } else if (isTokenKind(Token.TokenKind.STRINGLITERAL)) {
             return new Literal(Tree.Tag.NO_TAG, TypeTag.STRING, getMorpheme());
@@ -641,7 +656,7 @@ public class RedKnifeParser implements Parser {
                     }
                 }
             } else {
-                error(begin);
+                error(begin);//方法体内,非关键字操作(variableDecl、forDecl、ifDecl)都会触发异常
             }
         }
         return null;

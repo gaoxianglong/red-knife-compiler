@@ -28,7 +28,7 @@ import java.util.Objects;
  * @date created in 2020/5/15 3:37 下午
  */
 public class RedKnifeVisitor implements Visitor {
-    private Logger log = LoggerFactory.getLogger(RedKnifeVisitor.class);
+    private Logger log = LoggerFactory.getLogger("");
 
     @Override
     public void visit(Tree tree, String tab) {

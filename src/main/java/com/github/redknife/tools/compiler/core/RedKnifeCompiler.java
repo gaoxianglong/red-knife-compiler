@@ -50,6 +50,7 @@ public class RedKnifeCompiler {
         var trees = compile01(files);//执行词法、语法解析
         if (!trees.isEmpty()) {
             var visitor = new RedKnifeVisitor();
+            log.info("AST:");
             trees.forEach(tree -> visitor.visit(tree, ""));
         }
     }
@@ -65,7 +66,7 @@ public class RedKnifeCompiler {
         var result = new ArrayList<Tree>();
         for (File file : files) {
             var sourceCode = readSource(file);
-            log.info("\n{}:\n{}\n", file.getName(), sourceCode);
+            log.info("\nsource code:\n{}:\n{}\n", file.getName(), sourceCode);
             var tree = parser.parse(sourceCode, file.getName().split("\\.")[0]);//开始执行语法解析
             if (Objects.nonNull(tree)) {
                 result.add(tree);

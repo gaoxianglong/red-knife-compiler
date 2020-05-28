@@ -18,6 +18,6 @@ for(int i=1;i<=9;i++){
 }
 
 bool v3 = true;
-println(v4);
+println(v3);
 chars v4 = "Hello World";
 println(v4);

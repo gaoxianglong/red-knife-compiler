@@ -1,6 +1,7 @@
 int v1 = (10 + 2) * 10 / 9 + 1 * (3 + 1);
+v1++;
+v1--;
 println(v1);
-
 if(true){if(true){}else{}}else if(true){}else{print("");}
 
 for(int i=1;i<=9;i++){
@@ -16,14 +17,7 @@ for(int i=1;i<=9;i++){
     println("");
 }
 
-int v2 = 10;
-v2--;
-print(v2);
-v2 = v2 + 10;
-print(v2);
-
 bool v3 = true;
-chars v4 = "Hello World!";
-
-v4 = "test1111";
+println(v4);
+chars v4 = "Hello World";
 println(v4);

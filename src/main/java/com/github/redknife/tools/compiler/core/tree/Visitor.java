@@ -23,33 +23,51 @@ package com.github.redknife.tools.compiler.core.tree;
  * @date created in 2020/5/15 2:17 下午
  */
 public interface Visitor {
-    void visit(Tree tree, String tab);
+    default void visit(Tree tree, String tab) throws Throwable {
+    }
 
-    void visitBlock(Block block, String tab);
+    default void visitBlock(Block block, String tab) throws Throwable {
+    }
 
-    void visitClassDecl(ClassDecl classDecl, String tab);
+    default void visitClassDecl(ClassDecl classDecl, String tab) throws Throwable {
+    }
 
-    void visitExpression(Expression expression, String tab);
+    default void visitExpression(Expression expression, String tab) throws Throwable {
+    }
 
-    void visitExpressionStatement(ExpressionStatement expressionStatement, String tab);
+    default void visitExpressionStatement(ExpressionStatement expressionStatement, String tab) throws Throwable {
+    }
 
-    void visitForDecl(ForDecl forDecl, String tab);
+    default void visitForDecl(ForDecl forDecl, String tab) throws Throwable {
+    }
 
-    void visitIf(If if_, String tab);
+    default void visitIf(If if_, String tab) throws Throwable {
+    }
 
-    void visitLiteral(Literal literal, String tab);
+    default void visitLiteral(Literal literal, String tab) throws Throwable {
+    }
 
-    void visitMethodDecl(MethodDecl methodDecl, String tab);
+    default void visitMethodDecl(MethodDecl methodDecl, String tab) throws Throwable {
+    }
 
-    void visitParens(Parens parens, String tab);
+    default void visitParens(Parens parens, String tab) throws Throwable {
+    }
 
-    void visitStatement(Statement statement, String tab);
+    default void visitStatement(Statement statement, String tab) throws Throwable {
+    }
 
-    void visitVariableDecl(VariableDecl variableDecl, String tab);
+    default void visitVariableDecl(VariableDecl variableDecl, String tab) throws Throwable {
+    }
 
-    void visitBinary(Binary binary, String tab);
+    default void visitBinary(Binary binary, String tab) throws Throwable {
+    }
 
-    void visitIdent(Ident ident, String tab);
+    default void visitIdent(Ident ident, String tab) throws Throwable {
+    }
 
-    void visitFieldAccess(FieldAccess fieldAccess, String tab);
+    default void visitFieldAccess(FieldAccess fieldAccess, String tab) throws Throwable {
+    }
+
+    default void visitOther(Other other, String tab) throws Throwable {
+    }
 }

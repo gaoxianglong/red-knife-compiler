@@ -18,6 +18,8 @@ package com.github.redknife.tools.compiler.core.tree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.*;
+
 /**
  * 方法语法树
  *
@@ -27,7 +29,19 @@ import org.slf4j.LoggerFactory;
  */
 public class MethodDecl extends Tree {
     private TypeTag typeTag;
-    private Logger log = LoggerFactory.getLogger(MethodDecl.class);
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof MethodDecl)) return false;
+        MethodDecl that = (MethodDecl) o;
+        return getTypeTag() == that.getTypeTag() && getName() == that.getName();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getTypeTag(), getName());
+    }
 
     public MethodDecl() {
     }
@@ -54,7 +68,7 @@ public class MethodDecl extends Tree {
     }
 
     @Override
-    public void accept(Visitor visitor, String tag) {
+    public void accept(Visitor visitor, String tag) throws Throwable {
         visitor.visitMethodDecl(this, tag);
     }
 }

@@ -26,8 +26,6 @@ import org.slf4j.LoggerFactory;
  * @date created in 2020/5/15 3:09 下午
  */
 public class ExpressionStatement extends Statement {
-    private Logger log = LoggerFactory.getLogger(ExpressionStatement.class);
-
     public ExpressionStatement() {
     }
 
@@ -40,7 +38,7 @@ public class ExpressionStatement extends Statement {
     }
 
     @Override
-    public void accept(Visitor visitor, String tag) {
+    public void accept(Visitor visitor, String tag)throws Throwable {
         visitor.visitExpressionStatement(this, tag);
     }
 }

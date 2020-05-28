@@ -24,8 +24,6 @@ import org.slf4j.LoggerFactory;
  * @date created in 2020/5/18 4:39 下午
  */
 public class Ident extends Expression {
-    private Logger log = LoggerFactory.getLogger(Ident.class);
-
     public Ident() {
     }
 
@@ -38,7 +36,7 @@ public class Ident extends Expression {
     }
 
     @Override
-    public void accept(Visitor visitor, String tag) {
+    public void accept(Visitor visitor, String tag)throws Throwable {
         visitor.visitIdent(this, tag);
     }
 }

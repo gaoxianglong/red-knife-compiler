@@ -18,8 +18,6 @@ package com.github.redknife.tools.compiler.core.tree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-
 /**
  * 类语法树
  *
@@ -28,8 +26,6 @@ import java.util.ArrayList;
  * @date created in 2020/5/15 2:49 下午
  */
 public class ClassDecl extends Tree {
-    private Logger log = LoggerFactory.getLogger(ClassDecl.class);
-
     public ClassDecl() {
     }
 
@@ -42,7 +38,7 @@ public class ClassDecl extends Tree {
     }
 
     @Override
-    public void accept(Visitor visitor, String tag) {
+    public void accept(Visitor visitor, String tag)throws Throwable {
         visitor.visitClassDecl(this, tag);
     }
 }

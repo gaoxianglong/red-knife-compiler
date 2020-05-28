@@ -26,8 +26,6 @@ import org.slf4j.LoggerFactory;
  * @date created in 2020/5/15 3:17 下午
  */
 public class Expression extends Tree {
-    private Logger log = LoggerFactory.getLogger(Expression.class);
-
     public Expression() {
     }
 
@@ -40,7 +38,7 @@ public class Expression extends Tree {
     }
 
     @Override
-    public void accept(Visitor visitor, String tag) {
+    public void accept(Visitor visitor, String tag)throws Throwable {
         visitor.visitExpression(this, tag);
     }
 }

@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
  */
 public class Literal extends Expression {
     private TypeTag typeTag;
-    private Logger log = LoggerFactory.getLogger(Literal.class);
 
     public Literal() {
     }
@@ -54,7 +53,7 @@ public class Literal extends Expression {
     }
 
     @Override
-    public void accept(Visitor visitor, String tag) {
+    public void accept(Visitor visitor, String tag) throws Throwable {
         visitor.visitLiteral(this, tag);
     }
 }

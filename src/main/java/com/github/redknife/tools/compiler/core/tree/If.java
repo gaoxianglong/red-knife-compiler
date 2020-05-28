@@ -26,8 +26,6 @@ import org.slf4j.LoggerFactory;
  * @date created in 2020/5/15 3:15 下午
  */
 public class If extends Statement {
-    private Logger log = LoggerFactory.getLogger(If.class);
-
     public If() {
     }
 
@@ -40,7 +38,7 @@ public class If extends Statement {
     }
 
     @Override
-    public void accept(Visitor visitor, String tag) {
+    public void accept(Visitor visitor, String tag)throws Throwable {
         visitor.visitIf(this, tag);
     }
 }

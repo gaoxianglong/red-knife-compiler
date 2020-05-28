@@ -26,8 +26,6 @@ import org.slf4j.LoggerFactory;
  * @date created in 2020/5/15 8:44 下午
  */
 public class CompilationUnit extends Tree {
-    private Logger log = LoggerFactory.getLogger(CompilationUnit.class);
-
     public CompilationUnit() {
     }
 
@@ -40,7 +38,7 @@ public class CompilationUnit extends Tree {
     }
 
     @Override
-    public void accept(Visitor visitor, String tag) {
+    public void accept(Visitor visitor, String tag) throws Throwable{
         visitor.visit(this, tag);
     }
 }

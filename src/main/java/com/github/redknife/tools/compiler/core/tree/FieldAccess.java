@@ -24,8 +24,6 @@ import org.slf4j.LoggerFactory;
  * @date created in 2020/5/22 2:34 下午
  */
 public class FieldAccess extends Expression{
-    private Logger log = LoggerFactory.getLogger(FieldAccess.class);
-
     public FieldAccess() {
     }
 
@@ -38,7 +36,7 @@ public class FieldAccess extends Expression{
     }
 
     @Override
-    public void accept(Visitor visitor, String tag) {
+    public void accept(Visitor visitor, String tag)throws Throwable {
         visitor.visitFieldAccess(this, tag);
     }
 }

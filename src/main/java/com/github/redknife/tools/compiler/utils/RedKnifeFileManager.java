@@ -60,9 +60,9 @@ public class RedKnifeFileManager {
             capacity = capacity < 20480 ? 20480 : capacity;
             ByteBuffer result = null;
             if (Objects.nonNull(cached) && cached.capacity() >= capacity) {
-                log.info("before cache hashcode:{}", System.identityHashCode(cached));
+                log.debug("before cache hashcode:{}", System.identityHashCode(cached));
                 result = cached.clear();
-                log.info("after cache hashcode:{}", System.identityHashCode(result));
+                log.debug("after cache hashcode:{}", System.identityHashCode(result));
             } else {
                 result = ByteBuffer.allocate(capacity + capacity >> 1);
             }
@@ -99,10 +99,12 @@ public class RedKnifeFileManager {
      * @return
      */
     public static char[] toArray(CharBuffer cb) {
-        if (cb.hasArray()) {
-            return ((CharBuffer) cb.compact().flip()).array();
-        } else {
-            return cb.toString().toCharArray();
-        }
+        var src = cb.hasArray() ? ((CharBuffer) cb.compact().flip()).array() :
+                cb.toString().toCharArray();
+        var result = new char[src.length + 2];
+        System.arraycopy(src, 0, result, 1, result.length - 2);
+        result[0] = '{';
+        result[result.length - 1] = '}';
+        return result;
     }
 }

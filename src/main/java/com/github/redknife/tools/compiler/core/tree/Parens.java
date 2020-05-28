@@ -26,8 +26,6 @@ import org.slf4j.LoggerFactory;
  * @date created in 2020/5/15 3:10 下午
  */
 public class Parens extends Expression {
-    private Logger log = LoggerFactory.getLogger(Parens.class);
-
     public Parens() {
     }
 
@@ -40,7 +38,7 @@ public class Parens extends Expression {
     }
 
     @Override
-    public void accept(Visitor visitor, String tag) {
+    public void accept(Visitor visitor, String tag)throws Throwable {
         visitor.visitParens(this, tag);
     }
 }

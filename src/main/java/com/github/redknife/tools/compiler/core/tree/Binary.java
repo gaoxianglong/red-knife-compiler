@@ -26,8 +26,6 @@ import org.slf4j.LoggerFactory;
  * @date created in 2020/5/16 10:59 上午
  */
 public class Binary extends Expression {
-    private Logger log = LoggerFactory.getLogger(Expression.class);
-
     public Binary() {
     }
 
@@ -40,7 +38,7 @@ public class Binary extends Expression {
     }
 
     @Override
-    public void accept(Visitor visitor, String tag) {
+    public void accept(Visitor visitor, String tag) throws Throwable{
         visitor.visitBinary(this, tag);
     }
 }

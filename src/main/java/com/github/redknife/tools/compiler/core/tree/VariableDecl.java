@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
  */
 public class VariableDecl extends Statement {
     private TypeTag typeTag;
-    private Logger log = LoggerFactory.getLogger(VariableDecl.class);
 
     public VariableDecl() {
     }
@@ -47,7 +46,7 @@ public class VariableDecl extends Statement {
     }
 
     @Override
-    public void accept(Visitor visitor, String tag) {
+    public void accept(Visitor visitor, String tag)throws Throwable {
         visitor.visitVariableDecl(this, tag);
     }
 }

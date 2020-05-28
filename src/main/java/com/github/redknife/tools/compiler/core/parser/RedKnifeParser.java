@@ -28,19 +28,20 @@ import java.util.Objects;
 /**
  * red-knife-compiler语法分析器
  * <p>
- * 上下文无关文法如下：  variableDecl
+ * 上下文无关文法如下:
  * <p>
- * parse -> variableDecl methodDecl
- * methodDecl -> 'void' id '()' block
+ * parse -> block
  * ifDecl -> 'if' '(' expression ')' block ('else' 'if' '(' expression ')' block)* else block
- * forDecl -> 'for' '(' variableDecl ';' expression ';' expressionStatement')' block
+ * forDecl -> 'for' '(' variableDecl expression ';' expressionStatement')' block
  * expression -> primary | primary ('<' | '>' | '<=' | '>=' | '!=' | '==') primary
  * block -> '{' variableDecl expressionStatement';' forDecl ifDecl '}'
  * <p>
- * variableDecl -> intDecl | assignmentStatement
+ * variableDecl -> intDecl | charsDecl | booleanDecl | assignmentStatement
  * assignmentStatement -> id '=' additive ';'
  * expressionStatement -> primary(++ | --) | primary ('.'primary)* '('primary')'
  * intDecl -> 'int' id '=' additive ';'
+ * charsDecl -> 'chars' id '=' additive ';'
+ * booleanDecl -> 'boolean' id '=' additive ';'
  * additive -> multiplicative ((+ | -) multiplicative)*
  * multiplicative -> primary ((* | /) primary)*
  * primary -> 0-9 | id | (additive)
@@ -83,26 +84,159 @@ public class RedKnifeParser implements Parser {
         }
         var compilationUnit = new CompilationUnit(Tree.Tag.NO_TAG);
         var classDecl = new ClassDecl(Tree.Tag.CLASSDEF, className);
-        var classDeclChilds = classDecl.getChilds();
-        while (true) {
-            nextToken();
-            if (Objects.isNull(token)) break;
-            var begin = token.pos;
-            prevToken();
-            var c1 = methodDecl();
-            if (Objects.nonNull(c1)) {
-                classDeclChilds.add(c1);
-            }
-            var c2 = variableDecl();
-            if (Objects.nonNull(c2)) {
-                classDeclChilds.add(c2);
-            }
-            if (Objects.isNull(c1) && Objects.isNull(c2)) {
-                error(begin);//当方法体外围不满足语法规范时抛出异常
-            }
+        var methodDecl = new MethodDecl(Tree.Tag.METHODDEF, TypeTag.VOID, "main");
+        var child = block(0);
+        if (Objects.nonNull(child)) {
+            methodDecl.getChilds().add(child);
         }
+        classDecl.getChilds().add(methodDecl);
         compilationUnit.getChilds().add(classDecl);
         return compilationUnit;
+    }
+
+    /**
+     * 解析字符串变量声明语句
+     * charsDecl -> 'chars' id '=' additive ';'
+     *
+     * @return
+     * @throws Throwable
+     */
+    private VariableDecl charsDecl() throws Throwable {
+        nextToken();
+        if (Objects.isNull(token)) {
+            return null;
+        }
+        var begin = token.pos;//记录错误开始位置
+        if (isTokenKind(Token.TokenKind.CHARS)) {
+            nextToken();
+            if (isTokenKind(Token.TokenKind.IDENTIFIER)) {
+                var result = new VariableDecl(Tree.Tag.VARDEF, getMorpheme());
+                result.setTypeTag(TypeTag.CHARS);
+                nextToken();
+                if (isTokenKind(Token.TokenKind.EQ)) {
+                    result.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
+                    var child = additive(begin);
+                    if (Objects.nonNull(child)) {
+                        result.getChilds().add(child);
+                        nextToken();
+                        if (isTokenKind(Token.TokenKind.SEMI)) {
+                            result.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
+                            return result;
+                        } else {
+                            error(begin);
+                        }
+                    } else {
+                        error(begin);
+                    }
+                } else if (isTokenKind(Token.TokenKind.SEMI)) {
+                    result.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
+                    return result;
+                } else {
+                    error(begin);
+                }
+            } else {
+                error(begin);
+            }
+        } else {
+            prevToken();
+        }
+        return null;
+    }
+
+    /**
+     * 解析布尔变量声明语句
+     * booleanDecl -> 'boolean' id '=' additive ';'
+     *
+     * @return
+     * @throws Throwable
+     */
+    private VariableDecl booleanDecl() throws Throwable {
+        nextToken();
+        if (Objects.isNull(token)) {
+            return null;
+        }
+        var begin = token.pos;
+        if (isTokenKind(Token.TokenKind.BOOL)) {
+            nextToken();
+            if (isTokenKind(Token.TokenKind.IDENTIFIER)) {
+                var result = new VariableDecl(Tree.Tag.VARDEF, getMorpheme());
+                result.setTypeTag(TypeTag.BOOL);
+                nextToken();
+                if (isTokenKind(Token.TokenKind.EQ)) {
+                    result.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
+                    var child = additive(begin);
+                    if (Objects.nonNull(child)) {
+                        result.getChilds().add(child);
+                        nextToken();
+                        if (isTokenKind(Token.TokenKind.SEMI)) {
+                            result.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
+                            return result;
+                        }
+                    } else {
+                        error(begin);
+                    }
+                } else if (isTokenKind(Token.TokenKind.SEMI)) {
+                    result.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
+                    return result;
+                } else {
+                    error(begin);
+                }
+            } else {
+                error(begin);
+            }
+        } else {
+            prevToken();
+        }
+        return null;
+    }
+
+    /**
+     * 解析int类型的变量声明
+     * intDecl -> 'int' id '=' additive ';'
+     *
+     * @return
+     * @throws Throwable
+     */
+    private VariableDecl intDecl() throws Throwable {
+        nextToken();
+        if (Objects.isNull(token)) {
+            return null;
+        }
+        var begin = token.pos;
+        if (isTokenKind(Token.TokenKind.INT)) {
+            nextToken();
+            if (isTokenKind(Token.TokenKind.IDENTIFIER)) {
+                var result = new VariableDecl(Tree.Tag.VARDEF, getMorpheme());
+                result.setTypeTag(TypeTag.INT);
+                nextToken();
+                if (isTokenKind(Token.TokenKind.EQ)) {
+                    result.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
+                    var child = additive(begin);//解析二元表达式
+                    if (Objects.nonNull(child)) {
+                        result.getChilds().add(child);
+                        nextToken();
+                        if (isTokenKind(Token.TokenKind.SEMI)) {
+                            result.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
+                            return result;
+                        } else {
+                            error(begin);
+                        }
+                    } else {
+                        error(begin);
+                    }
+                } else if (isTokenKind(Token.TokenKind.SEMI)) {//成员变量允许仅声明
+                    result.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
+                    return result;
+                } else {
+                    error(begin);
+                }
+            } else {
+                error(begin);
+            }
+        } else {
+            prevToken();
+        }
+        return null;
     }
 
     /**
@@ -119,41 +253,44 @@ public class RedKnifeParser implements Parser {
         }
         var begin = token.pos;
         if (isTokenKind(Token.TokenKind.IF)) {
+            var result = new If(Tree.Tag.IF);
             nextToken();
             if (isTokenKind(Token.TokenKind.LPAREN)) {
+                result.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
                 var child = expression(begin);
                 if (Objects.nonNull(child)) {
-                    var result = new If(Tree.Tag.IF);
-                    var childs = result.getChilds();
-                    childs.add(child);//添加表达式
+                    result.getChilds().add(child);//添加表达式
                     nextToken();
                     if (isTokenKind(Token.TokenKind.RPAREN)) {
+                        result.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
                         child = block(begin);
-                        if (Objects.nonNull(child)) {
-                            childs.add(child);//添加block语句
+                        if (Objects.nonNull(child) && !child.getChilds().isEmpty()) {
+                            result.getChilds().add(child);//添加block语句
                         }
-                        while (true) {//解析else-if语句
+                        while (true) {//循环解析else-if语句
                             var temp = nextToken();
                             if (Objects.isNull(temp)) {
                                 error(begin);
                             } else if (isTokenKind(Token.TokenKind.ELSE)) {
                                 nextToken();
                                 if (isTokenKind(Token.TokenKind.IF)) {
+                                    var else_if = new If(Tree.Tag.ELSEIF);
                                     nextToken();
                                     if (isTokenKind(Token.TokenKind.LPAREN)) {
-                                        var elseif = new If(Tree.Tag.ELSEIF);
+                                        else_if.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
                                         child = expression(begin);
                                         if (Objects.nonNull(child)) {
-                                            elseif.getChilds().add(child);
+                                            else_if.getChilds().add(child);
                                         } else {
                                             error(begin);
                                         }
                                         nextToken();
                                         if (isTokenKind(Token.TokenKind.RPAREN)) {
+                                            else_if.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
                                             child = block(begin);
                                             if (Objects.nonNull(child)) {
-                                                elseif.getChilds().add(child);
-                                                childs.add(elseif);
+                                                else_if.getChilds().add(child);
+                                                result.getChilds().add(else_if);
                                             }
                                         } else {
                                             error(begin);
@@ -179,7 +316,7 @@ public class RedKnifeParser implements Parser {
                             if (Objects.nonNull(child)) {
                                 else_.getChilds().add(child);
                             }
-                            childs.add(else_);
+                            result.getChilds().add(else_);
                         } else {
                             prevToken();
                         }
@@ -199,7 +336,7 @@ public class RedKnifeParser implements Parser {
 
     /**
      * 解析for循环控制语句声明
-     * forDecl -> 'for' '(' variableDecl ';' expression ';' expressionStatement')' block
+     * forDecl -> 'for' '(' variableDecl expression ';' expressionStatement')' block
      *
      * @return
      * @throws Throwable
@@ -211,26 +348,28 @@ public class RedKnifeParser implements Parser {
         }
         var begin = token.pos;
         if (isTokenKind(Token.TokenKind.FOR)) {
+            var result = new ForDecl(Tree.Tag.FORLOOP);
             nextToken();
             if (isTokenKind(Token.TokenKind.LPAREN)) {
-                var result = new ForDecl(Tree.Tag.FORLOOP);
-                var childs = result.getChilds();
+                result.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
                 Tree child = variableDecl();
                 if (Objects.nonNull(child)) {
-                    childs.add(child);
+                    result.getChilds().add(child);
                     child = expression(begin);
                     if (Objects.nonNull(child)) {
-                        childs.add(child);
+                        result.getChilds().add(child);
                         nextToken();
                         if (isTokenKind(Token.TokenKind.SEMI)) {
+                            result.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
                             child = expressionStatement(begin);
                             if (Objects.nonNull(child)) {
-                                childs.add(child);
+                                result.getChilds().add(child);
                                 nextToken();
                                 if (isTokenKind(Token.TokenKind.RPAREN)) {
+                                    result.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
                                     child = block(begin);
                                     if (Objects.nonNull(child)) {
-                                        childs.add(child);
+                                        result.getChilds().add(child);
                                     }
                                 } else {
                                     error(begin);
@@ -285,52 +424,14 @@ public class RedKnifeParser implements Parser {
             prevToken();
             return child;
         }
-        var childs = result.getChilds();
-        childs.add(child);
+        result.getChilds().add(child);
+        result.getChilds().add(new Other(Tree.Tag.NO_TAG, result.getName()));
         child = primary(begin);
         if (Objects.isNull(child)) {
             error(begin);
         }
-        childs.add(child);
+        result.getChilds().add(child);
         return result;
-    }
-
-    /**
-     * 解析方法声明
-     * methodDecl -> 'void' id '()' block
-     *
-     * @return
-     * @throws Throwable
-     */
-    private Tree methodDecl() throws Throwable {
-        nextToken();
-        int begin = token.pos;
-        if (isTokenKind(Token.TokenKind.VOID)) {
-            nextToken();
-            var morpheme = getMorpheme();
-            if (isTokenKind(Token.TokenKind.IDENTIFIER)) {
-                nextToken();
-                var result = new MethodDecl(Tree.Tag.METHODDEF, TypeTag.VOID, morpheme);
-                if (isTokenKind(Token.TokenKind.LPAREN)) {
-                    nextToken();
-                    if (isTokenKind(Token.TokenKind.RPAREN)) {
-                        var child = block(begin);
-                        if (Objects.nonNull(child)) {
-                            result.getChilds().add(child);
-                        }
-                        return result;
-                    } else {
-                        error(begin);
-                    }
-                    error(begin);
-                }
-            } else {
-                error(begin);
-            }
-        } else {
-            prevToken();
-        }
-        return null;
     }
 
     /**
@@ -344,35 +445,35 @@ public class RedKnifeParser implements Parser {
         nextToken();
         if (Objects.isNull(token)) {
             return null;
-        } else if (isTokenKind(Token.TokenKind.LBRACE)) {
+        }
+        if (isTokenKind(Token.TokenKind.LBRACE)) {
             var result = new Block(Tree.Tag.NO_TAG);
-            var childs = result.getChilds();
+            result.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
             while (true) {
-                var c1 = variableDecl();//解析字段声明
-                if (Objects.nonNull(c1)) {
-                    childs.add(c1);
-                }
-                var c2 = expressionStatement(begin);//解析表达式语句
-                if (Objects.nonNull(c2)) {
+                Tree c1 = null;
+                Tree c2 = null;
+                Tree c3 = null;
+                Tree c4 = null;
+                if (Objects.nonNull(c1 = variableDecl())) {//解析字段声明
+                    result.getChilds().add(c1);
+                } else if (Objects.nonNull(c2 = expressionStatement(begin))) {//解析表达式语句
                     nextToken();
                     if (isTokenKind(Token.TokenKind.SEMI)) {
-                        childs.add(c2);
+                        result.getChilds().add(c2);
+                        result.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
                     } else {
                         error(begin);
                     }
-                }
-                var c3 = forDecl();//解析for循环语句声明
-                if (Objects.nonNull(c3)) {
-                    childs.add(c3);
-                }
-                var c4 = ifDecl();//解析if流程控制语句
-                if (Objects.nonNull(c4)) {
-                    childs.add(c4);
+                } else if (Objects.nonNull(c3 = forDecl())) {//解析for循环语句声明
+                    result.getChilds().add(c3);
+                } else if (Objects.nonNull(c4 = ifDecl())) {//解析if流程控制语句
+                    result.getChilds().add(c4);
                 }
                 nextToken();
                 if (Objects.isNull(token)) {
                     error(begin);
                 } else if (isTokenKind(Token.TokenKind.RBRACE)) {//允许方法体为空
+                    result.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
                     return result;
                 } else {
                     if (Objects.isNull(c1) && Objects.isNull(c2) &&
@@ -382,13 +483,15 @@ public class RedKnifeParser implements Parser {
                     prevToken();
                 }
             }
+        } else {
+            error(begin);
         }
         return null;
     }
 
     /**
      * 解析变量声明
-     * variableDecl -> intDecl | assignmentStatement
+     * variableDecl -> intDecl | charsDecl | booleanDecl | assignmentStatement
      *
      * @return
      * @throws Throwable
@@ -396,52 +499,15 @@ public class RedKnifeParser implements Parser {
     private VariableDecl variableDecl() throws Throwable {
         var result = intDecl();
         if (Objects.isNull(result)) {
+            result = charsDecl();
+        }
+        if (Objects.isNull(result)) {
+            result = booleanDecl();
+        }
+        if (Objects.isNull(result)) {
             result = assignmentStatement();
         }
         return result;
-    }
-
-    /**
-     * 解析int类型的变量声明
-     * intDecl -> 'int' id '=' additive ';'
-     *
-     * @return
-     * @throws Throwable
-     */
-    private VariableDecl intDecl() throws Throwable {
-        nextToken();
-        if (Objects.isNull(token)) {
-            return null;
-        }
-        var begin = token.pos;//记录错误开始位置
-        if (isTokenKind(Token.TokenKind.INT)) {
-            nextToken();
-            if (isTokenKind(Token.TokenKind.IDENTIFIER)) {
-                var result = new VariableDecl(Tree.Tag.VARDEF, getMorpheme());
-                result.setTypeTag(TypeTag.INT);
-                nextToken();
-                if (isTokenKind(Token.TokenKind.EQ)) {
-                    var child = additive(begin);//解析二元表达式
-                    if (Objects.isNull(child)) {
-                        error(begin);
-                    }
-                    result.getChilds().add(child);
-                    nextToken();
-                    if (isTokenKind(Token.TokenKind.SEMI)) {
-                        return result;
-                    } else {
-                        error(begin);
-                    }
-                } else {
-                    error(begin);
-                }
-            } else {
-                error(begin);
-            }
-        } else {
-            prevToken();
-        }
-        return null;
     }
 
     /**
@@ -453,13 +519,15 @@ public class RedKnifeParser implements Parser {
      */
     private VariableDecl assignmentStatement() throws Throwable {
         var temp = nextToken();
-        if (Objects.isNull(token)) return null;
+        if (Objects.isNull(token)) {
+            return null;
+        }
         int begin = token.pos;
         if (isTokenKind(Token.TokenKind.IDENTIFIER)) {
             var result = new VariableDecl(Tree.Tag.VARDEF, getMorpheme());
-            result.setTypeTag(TypeTag.INT);
             nextToken();
             if (isTokenKind(Token.TokenKind.EQ)) {
+                result.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
                 var child = additive(begin);
                 if (Objects.isNull(child)) {
                     error(begin);
@@ -467,6 +535,7 @@ public class RedKnifeParser implements Parser {
                 result.getChilds().add(child);
                 nextToken();
                 if (isTokenKind(Token.TokenKind.SEMI)) {
+                    result.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
                     return result;
                 } else {
                     error(begin);
@@ -493,7 +562,9 @@ public class RedKnifeParser implements Parser {
         Tree result = left;
         while (true) {
             nextToken();
-            if (Objects.isNull(token)) break;
+            if (Objects.isNull(token)) {
+                break;
+            }
             if (isTokenKind(Token.TokenKind.PLUS) || isTokenKind(Token.TokenKind.SUB)) {
                 var morpheme = getMorpheme();
                 Tree.Tag tag = isTokenKind(Token.TokenKind.PLUS) ? Tree.Tag.PLUS : Tree.Tag.SUB;
@@ -502,9 +573,9 @@ public class RedKnifeParser implements Parser {
                     error(begin);
                 }
                 result = new Binary(tag, morpheme);
-                var childs = result.getChilds();
-                childs.add(left);
-                childs.add(right);
+                result.getChilds().add(left);
+                result.getChilds().add(new Other(Tree.Tag.NO_TAG, morpheme));
+                result.getChilds().add(right);
                 left = result;
             } else {
                 prevToken();
@@ -524,10 +595,15 @@ public class RedKnifeParser implements Parser {
      */
     private Tree multiplicative(int begin) throws Throwable {
         Tree left = primary(begin);
+        if (Objects.isNull(left)) {
+            return null;
+        }
         Tree result = left;
         while (true) {
             nextToken();
-            if (Objects.isNull(token)) break;
+            if (Objects.isNull(token)) {
+                break;
+            }
             if (isTokenKind(Token.TokenKind.STAR) || isTokenKind(Token.TokenKind.SLASH)) {
                 var morpheme = getMorpheme();
                 Tree.Tag tag = isTokenKind(Token.TokenKind.STAR) ? Tree.Tag.STAR : Tree.Tag.SLASH;
@@ -536,9 +612,9 @@ public class RedKnifeParser implements Parser {
                     error(begin);
                 }
                 result = new Binary(tag, morpheme);
-                var childs = result.getChilds();
-                childs.add(left);
-                childs.add(right);
+                result.getChilds().add(left);
+                result.getChilds().add(new Other(Tree.Tag.NO_TAG, morpheme));
+                result.getChilds().add(right);
                 left = result;
             } else {
                 prevToken();
@@ -563,16 +639,20 @@ public class RedKnifeParser implements Parser {
         } else if (isTokenKind(Token.TokenKind.IDENTIFIER)) {
             return new Ident(Tree.Tag.NO_TAG, getMorpheme());
         } else if (isTokenKind(Token.TokenKind.STRINGLITERAL)) {
-            return new Literal(Tree.Tag.NO_TAG, TypeTag.STRING, getMorpheme());
+            return new Literal(Tree.Tag.NO_TAG, TypeTag.CHARS, getMorpheme());
         } else if (isTokenKind(Token.TokenKind.INTLITERAL)) {
             return new Literal(Tree.Tag.NO_TAG, TypeTag.INT, getMorpheme());
         } else if (isTokenKind(Token.TokenKind.TRUE) || isTokenKind(Token.TokenKind.FALSE)) {
-            return new Literal(Tree.Tag.NO_TAG, TypeTag.BOOLEAN, getMorpheme());
+            return new Literal(Tree.Tag.NO_TAG, TypeTag.BOOL, getMorpheme());
         } else if (isTokenKind(Token.TokenKind.LPAREN)) {
-            var result = additive(begin);
-            if (Objects.nonNull(result)) {
+            var result = new Other(Tree.Tag.NO_TAG);
+            result.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
+            var child = additive(begin);
+            if (Objects.nonNull(child)) {
+                result.getChilds().add(child);
                 nextToken();
                 if (isTokenKind(Token.TokenKind.RPAREN)) {
+                    result.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
                     return result;
                 } else {
                     error(begin);
@@ -586,8 +666,7 @@ public class RedKnifeParser implements Parser {
 
     /**
      * 解析表达式语句
-     * expressionStatement -> primary(++ | --) | primary ('.'primary)* '('primary')'
-     *
+     * expressionStatement -> primary(++ | --) | primary ('.'primary)* '(' primary ')'
      * @param begin
      * @return
      * @throws Throwable
@@ -601,19 +680,22 @@ public class RedKnifeParser implements Parser {
                 Tree.Tag tag = isTokenKind(Token.TokenKind.PLUSPLUS) ? Tree.Tag.POSTINC : Tree.Tag.POSTDEC;
                 var result = new ExpressionStatement(tag, morpheme);
                 result.getChilds().add(child);
+                result.getChilds().add(new Other(Tree.Tag.NO_TAG, morpheme));
                 return result;
             } else if (isTokenKind(Token.TokenKind.LPAREN)) {
                 var result = new ExpressionStatement(Tree.Tag.NO_TAG);
                 var temp = new FieldAccess(Tree.Tag.NO_TAG);
                 temp.getChilds().add(child);
-                var childs = result.getChilds();
+                temp.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
+                result.getChilds().add(temp);
                 child = primary(begin);
-                if (Objects.nonNull(child)) {
-                    childs.add(child);//添加方法入参
+                if (Objects.isNull(child)) {
+                    error(begin);
                 }
-                childs.add(temp);
+                result.getChilds().add(child);//添加方法入参
                 nextToken();
                 if (isTokenKind(Token.TokenKind.RPAREN)) {
+                    result.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
                     return result;
                 } else {
                     error(begin);
@@ -634,18 +716,20 @@ public class RedKnifeParser implements Parser {
                     }
                     nextToken();
                     if (isTokenKind(Token.TokenKind.DOT)) {
+                        temp.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
                         child = primary(begin);
                     } else {
                         if (isTokenKind(Token.TokenKind.LPAREN)) {
+                            temp.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
                             child = primary(begin);
                             var result = new ExpressionStatement(Tree.Tag.NO_TAG);
-                            var childs = result.getChilds();
+                            result.getChilds().add(first);
                             if (Objects.nonNull(child)) {
-                                childs.add(child);//添加方法入参
+                                result.getChilds().add(child);//添加方法入参
                             }
-                            childs.add(first);
                             nextToken();
                             if (isTokenKind(Token.TokenKind.RPAREN)) {
+                                result.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
                                 return result;
                             } else {
                                 error(begin);
@@ -656,7 +740,7 @@ public class RedKnifeParser implements Parser {
                     }
                 }
             } else {
-                error(begin);//方法体内,非关键字操作(variableDecl、forDecl、ifDecl)都会触发异常
+                error(begin);
             }
         }
         return null;
@@ -694,7 +778,7 @@ public class RedKnifeParser implements Parser {
      * @return
      */
     private String getMorpheme() {
-        return new String(token.attribute.morpheme);
+        return Objects.nonNull(token) ? new String(token.attribute.morpheme) : null;
     }
 
     /**

@@ -17,6 +17,7 @@ package com.github.redknife.tools.compiler.core.tree;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * AST抽象语法树
@@ -42,6 +43,19 @@ public abstract class Tree {
     public Tree() {
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Tree)) return false;
+        Tree tree = (Tree) o;
+        return getName().equals(tree.getName());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getName());
+    }
+
     public Tree(Tag tag, String name) {
         this.tag = tag;
         this.name = name;
@@ -52,7 +66,7 @@ public abstract class Tree {
         this(tag, null);
     }
 
-    public abstract void accept(Visitor visitor, String tab);
+    public abstract void accept(Visitor visitor, String tab) throws Throwable;
 
     public List<Tree> getChilds() {
         return childs;
@@ -71,7 +85,7 @@ public abstract class Tree {
     }
 
     /**
-     * 语法树标签
+     * 语法树类型
      */
     public enum Tag {
         CLASSDEF, METHODDEF, VARDEF, BLOCK, FORLOOP,

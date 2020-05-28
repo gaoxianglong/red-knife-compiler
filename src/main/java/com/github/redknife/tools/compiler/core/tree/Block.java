@@ -28,8 +28,6 @@ import java.util.ArrayList;
  * @date created in 2020/5/15 2:54 下午
  */
 public class Block extends Statement {
-    private Logger log = LoggerFactory.getLogger(Block.class);
-
     public Block() {
     }
 
@@ -42,7 +40,7 @@ public class Block extends Statement {
     }
 
     @Override
-    public void accept(Visitor visitor, String tag) {
+    public void accept(Visitor visitor, String tag)throws Throwable {
         visitor.visitBlock(this, tag);
     }
 }

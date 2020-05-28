@@ -55,7 +55,7 @@ public class Main {
         if (!sourceFiles.isEmpty()) {
             compiler.compile(sourceFiles);
         } else {
-            log.warn("目录:{}下没有加载到任何源文件", context.getIn());
+            log.warn("目录: {}下没有加载到任何源文件", context.getIn());
         }
     }
 

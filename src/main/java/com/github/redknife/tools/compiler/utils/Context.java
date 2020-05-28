@@ -25,18 +25,21 @@ package com.github.redknife.tools.compiler.utils;
 public class Context {
     private String in;
     private String out;
-    private String execute;
+    private boolean execute;
+    private boolean isDebug;
 
     private Context(Builder builder) {
         this.in = builder.in;
         this.out = builder.out;
         this.execute = builder.execute;
+        this.isDebug = builder.isDebug;
     }
 
     public static class Builder {
         private String in;
         private String out;
-        private String execute;
+        private boolean execute;
+        private boolean isDebug;
 
         public Builder(String in) {
             this.in = in;
@@ -47,13 +50,18 @@ public class Context {
             return this;
         }
 
-        public Builder execute(String execute) {
+        public Builder execute(boolean execute) {
             this.execute = execute;
             return this;
         }
 
         public Context build() {
             return new Context(this);
+        }
+
+        public Builder isDebug(boolean isDebug) {
+            this.isDebug = isDebug;
+            return this;
         }
     }
 
@@ -65,8 +73,12 @@ public class Context {
         return out;
     }
 
-    public String getExecute() {
+    public boolean isExecute() {
         return execute;
+    }
+
+    public boolean isDebug() {
+        return isDebug;
     }
 
     @Override
@@ -75,6 +87,7 @@ public class Context {
                 "in='" + in + '\'' +
                 ", out='" + out + '\'' +
                 ", execute='" + execute + '\'' +
+                ", isDebug=" + isDebug +
                 '}';
     }
 }

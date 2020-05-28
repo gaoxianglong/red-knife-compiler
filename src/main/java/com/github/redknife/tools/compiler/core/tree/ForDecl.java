@@ -26,8 +26,6 @@ import org.slf4j.LoggerFactory;
  * @date created in 2020/5/15 3:09 下午
  */
 public class ForDecl extends Statement {
-    private Logger log = LoggerFactory.getLogger(ForDecl.class);
-
     public ForDecl() {
     }
 
@@ -40,7 +38,7 @@ public class ForDecl extends Statement {
     }
 
     @Override
-    public void accept(Visitor visitor, String tag) {
+    public void accept(Visitor visitor, String tag)throws Throwable {
         visitor.visitForDecl(this, tag);
     }
 }

@@ -15,6 +15,7 @@
  */
 package com.github.redknife.tools.compiler.utils;
 
+import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.RuntimeMXBean;
@@ -28,8 +29,10 @@ import java.util.UUID;
  * @date created in 2020/5/13 2:21 下午
  */
 public class Constants {
+    public final static String SEPARATE = File.separator;
     public final static String FILE_ENCODING = System.getProperty("file.encoding");
-    public final static String SOURCE_CODE_FILE_POSTFIX = ".rk";
+    public final static String SOURCE_CODE_FILE_POSTFIX = ".rs";
+    public final static String TARGET_CODE_FILE_POSTFIX = ".class";
     public final static String OUTPUT_PATH = System.getProperty("java.io.tmpdir");
     public final static String OS_NAME = System.getProperty("os.name");
     public final static String COPYRIGHT = "gao_xianglong@sina.com";

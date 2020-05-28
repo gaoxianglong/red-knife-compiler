@@ -36,13 +36,17 @@ public class Main {
      */
     private static String in;
     /**
+     * 是否开启调试模式
+     */
+    private static boolean isDebug;
+    /**
      * 中间代码输出路径地址,缺省为操作系统的临时目录
      */
     private static String out = Constants.OUTPUT_PATH;
     /**
      * 是否编译后执行
      */
-    private static String execute = null;
+    private static boolean execute;
     private static Logger log = LoggerFactory.getLogger(Main.class);
 
     /**
@@ -58,7 +62,7 @@ public class Main {
         }
         if (!parseParam(args)) System.exit(0);
         Objects.requireNonNull(in, "入参--in <value>不允许为空");
-        var context = new Context.Builder(in).out(out).execute(execute).build();
+        var context = new Context.Builder(in).out(out).isDebug(isDebug).execute(execute).build();
         Information.print(context);
         new com.github.redknife.tools.compiler.core.Main(context).compile();//执行编译
     }
@@ -81,6 +85,16 @@ public class Main {
                 case "--out":
                     out = args[++i];
                     break;
+                case "-d":
+                case "-debug":
+                case "--debug":
+                    isDebug = true;
+                    break;
+                case "-e":
+                case "--execute":
+                case "-execute":
+                    execute = true;
+                    break;
                 case "-v":
                 case "-version":
                 case "--version":
@@ -91,10 +105,12 @@ public class Main {
                 case "-help":
                 case "--help":
                     System.out.println(String.format("操作和入参:\n" +
-                            "-h,--help                  打印使用规则\n" +
-                            "\t--in              <value>    源代码目录地址\n" +
-                            "\t--out             <value>    中间代码的输出目录地址, 缺省为操作系统临时目录下\n" +
-                            "\t--version         <value>    输出当前版本号"));
+                            "\t-h -help --help               打印使用规则\n" +
+                            "\t-d -debug --debug             开启调试信息, 缺省关闭\n" +
+                            "\t-e -execute --execute         编译结束是否立即运行, 缺省不运行\n" +
+                            "\t--in           <value>        源代码目录地址\n" +
+                            "\t--out          <value>        中间代码的输出目录地址, 缺省为操作系统临时目录下\n" +
+                            "\t--version      <value>        输出当前版本号"));
                     result = false;
                     break loop;
                 default:

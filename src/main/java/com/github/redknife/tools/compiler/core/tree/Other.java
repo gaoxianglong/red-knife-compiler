@@ -15,18 +15,29 @@
  */
 package com.github.redknife.tools.compiler.core.tree;
 
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
- * 类型
- *
  * @author gao_xianglong@sina.com
  * @version 0.1-SNAPSHOT
- * @date created in 2020/5/16 12:41 上午
+ * @date created in 2020/5/27 11:19 上午
  */
-public enum TypeTag {
-    INT("int"), CHARS("java.lang.String"), BOOL("bool"), VOID("void");
-    public String name;
+public class Other extends Tree {
+    public Other() {
+    }
 
-    TypeTag(String name) {
-        this.name = name;
+    public Other(Tag tag) {
+        super(tag);
+    }
+
+    public Other(Tag tag, String name) {
+        super(tag, name);
+    }
+
+    @Override
+    public void accept(Visitor visitor, String tag) throws Throwable {
+        visitor.visitOther(this, tag);
     }
 }

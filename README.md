@@ -16,7 +16,7 @@ java com.github.redknife.tools.compiler.launcher.Main -h
 	--version      <value>        输出当前版本号
 ```
 文法规则:
-<font color=#90EE90>
+```java
  * parse -> block
  * ifDecl -> 'if' '(' expression ')' block ('else' 'if' '(' expression ')' block)* else block
  * forDecl -> 'for' '(' variableDecl expression ';' expressionStatement')' block
@@ -32,8 +32,7 @@ java com.github.redknife.tools.compiler.launcher.Main -h
  * multiplicative -> primary ((* | /) primary)*
  * primary -> 0-9 | id | (additive) | true | false
  * id -> identifier
-</font>
-
+```
 脚本示例(test.rs):
 ```java
 int v1 = (10 + 2) * 10 / 9 + 1 * (3 + 1);

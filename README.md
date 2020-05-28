@@ -2,7 +2,16 @@
 ```java
 java com.github.redknife.tools.compiler.launcher.Main -d -e --in path --out path
 ```
-
+参数解释：
+```java
+操作和入参:
+	-h -help --help               打印使用规则
+	-d -debug --debug             开启调试信息, 缺省关闭
+	-e -execute --execute         编译结束是否立即运行, 缺省不运行
+	--in           <value>        源代码目录地址
+	--out          <value>        中间代码的输出目录地址, 缺省为操作系统临时目录下
+	--version      <value>        输出当前版本号
+```
 文法规则:
 ```java
  * parse -> block
@@ -29,7 +38,6 @@ v1++;
 v1--;
 println(v1);
 if(true){if(true){}else{}}else if(true){}else{print("");}
-
 for(int i=1;i<=9;i++){
     for(int j=1;j<=i;j++){
         print(i);
@@ -42,9 +50,8 @@ for(int i=1;i<=9;i++){
     }
     println("");
 }
-
 bool v3 = true;
-println(v4);
+println(v3);
 chars v4 = "Hello World";
 println(v4);
 ```

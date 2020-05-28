@@ -1,9 +1,9 @@
 执行方式:
-```java
+```xml
 java com.github.redknife.tools.compiler.launcher.Main -d -e --in path --out path
 ```
 参数解释：
-```java
+```xml
 操作和入参:
 	-h -help --help               打印使用规则
 	-d -debug --debug             开启调试信息, 缺省关闭
@@ -13,7 +13,7 @@ java com.github.redknife.tools.compiler.launcher.Main -d -e --in path --out path
 	--version      <value>        输出当前版本号
 ```
 文法规则:
-```java
+```xml
  * parse -> block
  * ifDecl -> 'if' '(' expression ')' block ('else' 'if' '(' expression ')' block)* else block
  * forDecl -> 'for' '(' variableDecl expression ';' expressionStatement')' block

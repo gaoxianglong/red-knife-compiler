@@ -47,7 +47,6 @@ public class RedKnifeCompiler {
     private Parser parser;
     private Context context;
     private Generate generate;
-    private List<String> paths, names;
     private Logger log = LoggerFactory.getLogger(RedKnifeCompiler.class);
 
     public RedKnifeCompiler(Context context) {
@@ -55,8 +54,6 @@ public class RedKnifeCompiler {
         this.classPool = ClassPool.getDefault();
         this.generate = new Generate(context);
         this.parser = new RedKnifeParser();
-        paths = new ArrayList<>();
-        names = new ArrayList<>();
     }
 
     public void compile(List<File> files) throws Throwable {
@@ -69,63 +66,7 @@ public class RedKnifeCompiler {
         printASTTree(trees);//打印语法树
         compile02(trees);//转义为Java代码后再进行语义分析和生成中间代码
         log.info("编译结束，耗时: {}ms", System.currentTimeMillis() - begin);
-        execute();
-    }
-
-    /**
-     * 编译结束后进行执行
-     */
-    private void execute() {
-        if (!context.isExecute()) {
-            return;
-        }
-        try {
-            getClasses(new File(context.getOut()));//获取中间代码路径
-            for (int i = 0; i < names.size(); i++) {
-                log.info("执行{}", names.get(i));
-                int index = i;
-                var classLoader = new ClassLoader() {
-                    @Override
-                    protected Class<?> findClass(String name) throws ClassNotFoundException {
-                        try (var in = new BufferedInputStream(new FileInputStream(String.format("%s%s%s",
-                                paths.get(index), Constants.SEPARATE, names.get(index))))) {
-                            byte[] value = new byte[in.available()];
-                            in.read(value);
-                            return defineClass(name, value, 0, value.length);
-                        } catch (Throwable e) {
-                            log.error("执行失败:\n", e);
-                        }
-                        return null;
-                    }
-                };
-                var class_ = classLoader.loadClass(names.get(i).split("\\.")[0]);
-                var method = class_.getDeclaredMethod("main", String[].class);
-                method.invoke(class_, (Object) new String[]{});
-            }
-        } catch (Throwable e) {
-            log.error("执行失败:\n", e);
-        }
-    }
-
-    /**
-     * 加载目标中间代码的路径
-     *
-     * @param file
-     * @throws Throwable
-     */
-    private void getClasses(File file) throws Throwable {
-        Objects.requireNonNull(file);
-        var files = file.listFiles();
-        for (File f : files) {
-            if (f.isFile()) {
-                if (f.getName().endsWith(Constants.TARGET_CODE_FILE_POSTFIX)) {
-                    paths.add(f.getParent());
-                    names.add(f.getName());
-                }
-            } else {
-                getClasses(f);
-            }
-        }
+        new Actuator(context).execute();//调用执行器执行
     }
 
     /**

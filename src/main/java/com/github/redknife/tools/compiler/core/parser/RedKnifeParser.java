@@ -41,10 +41,10 @@ import java.util.Objects;
  * expressionStatement -> primary(++ | --) | primary ('.'primary)* '('primary')'
  * intDecl -> 'int' id '=' additive ';'
  * charsDecl -> 'chars' id '=' additive ';'
- * booleanDecl -> 'boolean' id '=' additive ';'
+ * boolDecl -> 'bool' id '=' additive ';'
  * additive -> multiplicative ((+ | -) multiplicative)*
  * multiplicative -> primary ((* | /) primary)*
- * primary -> 0-9 | id | (additive)
+ * primary -> 0-9 | id | (additive) | true | false
  * id -> identifier
  *
  * @author gao_xianglong@sina.com
@@ -145,12 +145,12 @@ public class RedKnifeParser implements Parser {
 
     /**
      * 解析布尔变量声明语句
-     * booleanDecl -> 'boolean' id '=' additive ';'
+     * boolDecl -> 'bool' id '=' additive ';'
      *
      * @return
      * @throws Throwable
      */
-    private VariableDecl booleanDecl() throws Throwable {
+    private VariableDecl boolDecl() throws Throwable {
         nextToken();
         if (Objects.isNull(token)) {
             return null;
@@ -502,7 +502,7 @@ public class RedKnifeParser implements Parser {
             result = charsDecl();
         }
         if (Objects.isNull(result)) {
-            result = booleanDecl();
+            result = boolDecl();
         }
         if (Objects.isNull(result)) {
             result = assignmentStatement();

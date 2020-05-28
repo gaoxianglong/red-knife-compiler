@@ -15,6 +15,7 @@
  */
 package com.github.redknife.tools.compiler.core;
 
+import com.github.redknife.tools.compiler.exceptions.FileReadException;
 import com.github.redknife.tools.compiler.utils.Constants;
 import com.github.redknife.tools.compiler.utils.Context;
 import org.slf4j.Logger;
@@ -50,7 +51,11 @@ public class Main {
      * @throws Throwable
      */
     public void compile() throws Throwable {
-        getSourceFiles(new File(context.getIn()));
+        var file = new File(context.getIn());
+        if (!file.isDirectory()) {
+            throw new FileReadException(String.format("%s不是目录", file.getPath()));
+        }
+        getSourceFiles(file);
         log.debug(sourceFiles.toString());
         if (!sourceFiles.isEmpty()) {
             compiler.compile(sourceFiles);

@@ -16,6 +16,7 @@
 package com.github.redknife.tools.compiler.core.parser;
 
 import com.github.redknife.tools.compiler.core.tree.*;
+import com.github.redknife.tools.compiler.exceptions.FileWriteException;
 import com.github.redknife.tools.compiler.utils.Context;
 import javassist.ClassPool;
 import javassist.CtClass;
@@ -23,6 +24,7 @@ import javassist.CtMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.List;
 import java.util.Objects;
 
@@ -55,7 +57,11 @@ public class Generate implements Visitor {
     public void compile(List<Tree> trees) throws Throwable {
         for (Tree t : trees) {
             visit(t, null);
-            ctClass.writeFile(context.getOut());
+            var out = context.getOut();
+            if (!new File(out).isDirectory()) {
+                throw new FileWriteException(String.format("%s不是目录", out));
+            }
+            ctClass.writeFile(out);
         }
     }
 

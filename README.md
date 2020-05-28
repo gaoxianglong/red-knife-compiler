@@ -5,6 +5,8 @@ java com.github.redknife.tools.compiler.launcher.Main -d -e --in path --out path
 参数解释：
 ```java
 java com.github.redknife.tools.compiler.launcher.Main -h
+```
+```java
 操作和入参:
 	-h -help --help               打印使用规则
 	-d -debug --debug             开启调试信息, 缺省关闭
@@ -32,7 +34,7 @@ java com.github.redknife.tools.compiler.launcher.Main -h
  * primary -> 0-9 | id | (additive)
  * id -> identifier
 ```
-脚本示例:
+脚本示例(test.rs):
 ```java
 int v1 = (10 + 2) * 10 / 9 + 1 * (3 + 1);
 v1++;

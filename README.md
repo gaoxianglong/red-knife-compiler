@@ -58,4 +58,3 @@ println(v3);
 chars v4 = "Hello World";
 println(v4);
 ```
-

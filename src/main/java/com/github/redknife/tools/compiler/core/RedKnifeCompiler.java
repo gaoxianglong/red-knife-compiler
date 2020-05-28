@@ -19,6 +19,7 @@ import com.github.redknife.tools.compiler.core.parser.Generate;
 import com.github.redknife.tools.compiler.core.parser.Parser;
 import com.github.redknife.tools.compiler.core.parser.RedKnifeParser;
 import com.github.redknife.tools.compiler.core.tree.*;
+import com.github.redknife.tools.compiler.exceptions.ExecuteException;
 import com.github.redknife.tools.compiler.exceptions.ParseException;
 import com.github.redknife.tools.compiler.utils.Constants;
 import com.github.redknife.tools.compiler.utils.Context;
@@ -66,7 +67,11 @@ public class RedKnifeCompiler {
         printASTTree(trees);//打印语法树
         compile02(trees);//转义为Java代码后再进行语义分析和生成中间代码
         log.info("编译结束，耗时: {}ms", System.currentTimeMillis() - begin);
-        new Actuator(context).execute();//调用执行器执行
+        try {
+            new Actuator(context).execute();//调用执行器执行
+        } catch (ExecuteException e) {
+            log.error("{}", e);//执行失败异常单独处理
+        }
     }
 
     /**

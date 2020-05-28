@@ -15,14 +15,13 @@
  */
 package com.github.redknife.tools.compiler.core;
 
+import com.github.redknife.tools.compiler.exceptions.ExecuteException;
 import com.github.redknife.tools.compiler.utils.Constants;
 import com.github.redknife.tools.compiler.utils.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -35,65 +34,64 @@ import java.util.Objects;
  * @date created in 2020/5/28 4:49 下午
  */
 public class Actuator {
-    private List<String> paths, names;
+    private List<String> classes;
     private Context context;
     private Logger log = LoggerFactory.getLogger(Actuator.class);
 
     public Actuator(Context context) {
         this.context = context;
-        paths = new ArrayList<>();
-        names = new ArrayList<>();
+        classes = new ArrayList<>();
     }
 
     /**
-     * 编译结束后进行执行
+     * 执行目标字节码
+     *
+     * @throws ExecuteException
      */
-    public void execute() {
+    public void execute() throws ExecuteException {
         if (!context.isExecute()) {
             return;
         }
-        try {
-            getClasses(new File(context.getOut()));//获取中间代码路径
-            for (int i = 0; i < names.size(); i++) {
-                log.info("执行{}", names.get(i));
-                int index = i;
-                var classLoader = new ClassLoader() {
-                    @Override
-                    protected Class<?> findClass(String name) throws ClassNotFoundException {
-                        try (var in = new BufferedInputStream(new FileInputStream(String.format("%s%s%s",
-                                paths.get(index), Constants.SEPARATE, names.get(index))))) {
-                            byte[] value = new byte[in.available()];
-                            in.read(value);
-                            return defineClass(name, value, 0, value.length);
-                        } catch (Throwable e) {
-                            log.error("执行失败:\n", e);
-                        }
-                        return null;
-                    }
-                };
-                var class_ = classLoader.loadClass(names.get(i).split("\\.")[0]);
-                var method = class_.getDeclaredMethod("main", String[].class);
-                method.invoke(class_, (Object) new String[]{});
+        var outPath = context.getOut();
+        getClasses(new File(outPath));//获取中间代码路径
+        var classLoader = new ClassLoader() {
+            @Override
+            protected Class<?> findClass(String name) throws ClassNotFoundException {
+                var path = String.format("%s%s%s%s", outPath,
+                        Constants.SEPARATE, name, Constants.TARGET_CODE_FILE_POSTFIX);
+                try (var in = new BufferedInputStream(new FileInputStream(path))) {
+                    byte[] value = new byte[in.available()];
+                    in.read(value);
+                    return defineClass(name, value, 0, value.length);
+                } catch (Throwable e) {
+                    throw new ClassNotFoundException(String.format("%s文件加载失败", path));
+                }
             }
-        } catch (Throwable e) {
-            log.error("执行失败:\n", e);
+        };
+        for (String cls : classes) {
+            log.info("正在执行{}", cls);
+            try {
+                classLoader.loadClass(cls).
+                        getDeclaredMethod("main", String[].class).
+                        invoke(null, (Object) new String[]{});
+            } catch (Throwable e) {
+                throw new ExecuteException(String.format("%s执行失败!", cls), e);
+            }
         }
     }
 
     /**
-     * 加载目标中间代码的路径
+     * 加载目标目录下的所有.class文件
      *
      * @param file
-     * @throws Throwable
      */
-    private void getClasses(File file) throws Throwable {
+    private void getClasses(File file) {
         Objects.requireNonNull(file);
         var files = file.listFiles();
         for (File f : files) {
             if (f.isFile()) {
                 if (f.getName().endsWith(Constants.TARGET_CODE_FILE_POSTFIX)) {
-                    paths.add(f.getParent());
-                    names.add(f.getName());
+                    classes.add(f.getName().split("\\.")[0]);
                 }
             } else {
                 getClasses(f);

@@ -28,10 +28,10 @@ java com.github.redknife.tools.compiler.launcher.Main -h
  * expressionStatement -> primary(++ | --) | primary ('.'primary)* '('primary')'
  * intDecl -> 'int' id '=' additive ';'
  * charsDecl -> 'chars' id '=' additive ';'
- * booleanDecl -> 'boolean' id '=' additive ';'
+ * boolDecl -> 'bool' id '=' additive ';'
  * additive -> multiplicative ((+ | -) multiplicative)*
  * multiplicative -> primary ((* | /) primary)*
- * primary -> 0-9 | id | (additive)
+ * primary -> 0-9 | id | (additive) | true | false
  * id -> identifier
 ```
 脚本示例(test.rs):

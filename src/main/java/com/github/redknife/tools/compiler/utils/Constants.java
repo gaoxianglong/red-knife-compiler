@@ -35,9 +35,9 @@ public class Constants {
     public final static String TARGET_CODE_FILE_POSTFIX = ".class";
     public final static String OUTPUT_PATH = System.getProperty("java.io.tmpdir");
     public final static String OS_NAME = System.getProperty("os.name");
-    public final static String COPYRIGHT = "gao_xianglong@sina.com";
+    public final static String COPYRIGHT = "gao_xianglong@sina.com. All Rights Reserved.";
     public final static String IGNITE_DOCUMENTATION = "https://github.com/gaoxianglong/red-knife-compiler";
-    public final static String VERSION = "0.0.1-SNAPSHOT";
+    public final static String VERSION = "0.2-SNAPSHOT";
     public static final String LINE = System.getProperty("line.separator");
     public final static String EXCEPTION_PREFIX = "编译失败";
 

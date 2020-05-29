@@ -21,11 +21,12 @@ java com.github.redknife.tools.compiler.launcher.Main -h
  * ifDecl -> 'if' '(' expression ')' block ('else' 'if' '(' expression ')' block)* else block
  * forDecl -> 'for' '(' variableDecl expression ';' expressionStatement')' block
  * expression -> primary | primary ('<' | '>' | '<=' | '>=' | '!=' | '==') primary
- * block -> '{' variableDecl expressionStatement';' forDecl ifDecl '}'
- * variableDecl -> intDecl | charsDecl | booleanDecl | assignmentStatement
+ * block -> '{' variableDecl | expressionStatement';' | forDecl | ifDecl '}'
+ * variableDecl -> intDecl | floatDecl | charsDecl | boolDecl | assignmentStatement
  * assignmentStatement -> id '=' additive ';'
  * expressionStatement -> primary(++ | --) | primary ('.'primary)* '('primary')'
  * intDecl -> 'int' id '=' additive ';'
+ * floatDecl -> 'float' id '=' additive ';'
  * charsDecl -> 'chars' id '=' additive ';'
  * boolDecl -> 'bool' id '=' additive ';'
  * additive -> multiplicative ((+ | -) multiplicative)*

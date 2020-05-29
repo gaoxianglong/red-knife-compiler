@@ -34,12 +34,12 @@ import java.util.Objects;
  * ifDecl -> 'if' '(' expression ')' block ('else' 'if' '(' expression ')' block)* else block
  * forDecl -> 'for' '(' variableDecl expression ';' expressionStatement')' block
  * expression -> primary | primary ('<' | '>' | '<=' | '>=' | '!=' | '==') primary
- * block -> '{' variableDecl expressionStatement';' forDecl ifDecl '}'
- * <p>
- * variableDecl -> intDecl | charsDecl | booleanDecl | assignmentStatement
+ * block -> '{' variableDecl | expressionStatement';' | forDecl | ifDecl '}'
+ * variableDecl -> intDecl | floatDecl | charsDecl | boolDecl | assignmentStatement
  * assignmentStatement -> id '=' additive ';'
  * expressionStatement -> primary(++ | --) | primary ('.'primary)* '('primary')'
  * intDecl -> 'int' id '=' additive ';'
+ * floatDecl -> 'float' id '=' additive ';'
  * charsDecl -> 'chars' id '=' additive ';'
  * boolDecl -> 'bool' id '=' additive ';'
  * additive -> multiplicative ((+ | -) multiplicative)*
@@ -176,6 +176,56 @@ public class RedKnifeParser implements Parser {
                         error(begin);
                     }
                 } else if (isTokenKind(Token.TokenKind.SEMI)) {
+                    result.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
+                    return result;
+                } else {
+                    error(begin);
+                }
+            } else {
+                error(begin);
+            }
+        } else {
+            prevToken();
+        }
+        return null;
+    }
+
+    /**
+     * 解析float类型的变量声明
+     * floatDecl -> 'float' id '=' additive ';'
+     *
+     * @return
+     * @throws Throwable
+     */
+
+    private VariableDecl floatDecl() throws Throwable {
+        nextToken();
+        if (Objects.isNull(token)) {
+            return null;
+        }
+        var begin = token.pos;
+        if (isTokenKind(Token.TokenKind.FLOAT)) {
+            nextToken();
+            if (isTokenKind(Token.TokenKind.IDENTIFIER)) {
+                var result = new VariableDecl(Tree.Tag.VARDEF, getMorpheme());
+                result.setTypeTag(TypeTag.FLOAT);
+                nextToken();
+                if (isTokenKind(Token.TokenKind.EQ)) {
+                    result.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
+                    var child = additive(begin);//解析二元表达式
+                    if (Objects.nonNull(child)) {
+                        result.getChilds().add(child);
+                        nextToken();
+                        if (isTokenKind(Token.TokenKind.SEMI)) {
+                            result.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
+                            return result;
+                        } else {
+                            error(begin);
+                        }
+                    } else {
+                        error(begin);
+                    }
+                } else if (isTokenKind(Token.TokenKind.SEMI)) {//成员变量允许仅声明
                     result.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
                     return result;
                 } else {
@@ -436,7 +486,7 @@ public class RedKnifeParser implements Parser {
 
     /**
      * 解析代码块
-     * block -> '{' variableDecl expressionStatement';' forDecl ifDecl '}'
+     * block -> '{' variableDecl | expressionStatement';' | forDecl | ifDecl '}'
      *
      * @param begin
      * @return
@@ -491,13 +541,16 @@ public class RedKnifeParser implements Parser {
 
     /**
      * 解析变量声明
-     * variableDecl -> intDecl | charsDecl | booleanDecl | assignmentStatement
+     * variableDecl -> intDecl | floatDecl | charsDecl | boolDecl | assignmentStatement
      *
      * @return
      * @throws Throwable
      */
     private VariableDecl variableDecl() throws Throwable {
         var result = intDecl();
+        if (Objects.isNull(result)) {
+            result = floatDecl();
+        }
         if (Objects.isNull(result)) {
             result = charsDecl();
         }
@@ -638,10 +691,12 @@ public class RedKnifeParser implements Parser {
             return null;
         } else if (isTokenKind(Token.TokenKind.IDENTIFIER)) {
             return new Ident(Tree.Tag.NO_TAG, getMorpheme());
-        } else if (isTokenKind(Token.TokenKind.STRINGLITERAL)) {
+        } else if (isTokenKind(Token.TokenKind.CHARSLITERAL)) {
             return new Literal(Tree.Tag.NO_TAG, TypeTag.CHARS, getMorpheme());
         } else if (isTokenKind(Token.TokenKind.INTLITERAL)) {
             return new Literal(Tree.Tag.NO_TAG, TypeTag.INT, getMorpheme());
+        } else if (isTokenKind(Token.TokenKind.FLOATLITERAL)) {
+            return new Literal(Tree.Tag.NO_TAG, TypeTag.FLOAT, getMorpheme());
         } else if (isTokenKind(Token.TokenKind.TRUE) || isTokenKind(Token.TokenKind.FALSE)) {
             return new Literal(Tree.Tag.NO_TAG, TypeTag.BOOL, getMorpheme());
         } else if (isTokenKind(Token.TokenKind.LPAREN)) {
@@ -667,6 +722,7 @@ public class RedKnifeParser implements Parser {
     /**
      * 解析表达式语句
      * expressionStatement -> primary(++ | --) | primary ('.'primary)* '(' primary ')'
+     *
      * @param begin
      * @return
      * @throws Throwable

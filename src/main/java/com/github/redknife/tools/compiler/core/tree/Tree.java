@@ -97,7 +97,8 @@ public abstract class Tree {
         GT, // >
         LE, // <=
         GE, // >=
-        EQ; //==
+        EQ, //==
+        ANNOTATION;
     }
 
     @Override

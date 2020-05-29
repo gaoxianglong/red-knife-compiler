@@ -173,7 +173,7 @@ public class Scanner implements Lexer {
         if (ch != '\"') throw new ParseException(String.format("未结束的字符串文字:%s", new String(sbuf)));
         addMorpheme();
         try {
-            return getToken(Token.TokenKind.STRINGLITERAL, pos);
+            return getToken(Token.TokenKind.CHARSLITERAL, pos);
         } finally {
             sbuf = null;
         }
@@ -227,6 +227,7 @@ public class Scanner implements Lexer {
      * @return
      */
     private Token scanNumber(int pos) {
+        boolean isPoint = false;
         while (true) {
             switch (ch) {
                 //@formatter:off
@@ -234,9 +235,15 @@ public class Scanner implements Lexer {
                 case '5': case '6': case '7': case '8': case '9':
                     break;
                 //@formatter:on
+                case '.':
+                    if (!isPoint) {
+                        isPoint = true;
+                        break;
+                    }
                 default:
                     try {
-                        return getToken(Token.TokenKind.INTLITERAL, pos);
+                        return getToken(isPoint ? Token.TokenKind.FLOATLITERAL :
+                                Token.TokenKind.INTLITERAL, pos);
                     } finally {
                         prevChar();
                         sbuf = null;
@@ -390,11 +397,7 @@ public class Scanner implements Lexer {
     }
 
     public static void main(String[] agrs) throws ParseException {
-        String code = "String str = \"Hello World\";" +
-                "int v1 = 100;" +
-                "boolean v2 = true;" +
-                "int v3=(1+2)*3;\n" +
-                "\r\t\nv++;";
+        String code = "sa = \"dd\"";
         Scanner scanner = new Scanner(code.toCharArray()).init();
         while (true) {
             var token = scanner.nextToken();

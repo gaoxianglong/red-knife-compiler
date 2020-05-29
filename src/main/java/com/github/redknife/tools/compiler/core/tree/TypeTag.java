@@ -23,7 +23,8 @@ package com.github.redknife.tools.compiler.core.tree;
  * @date created in 2020/5/16 12:41 上午
  */
 public enum TypeTag {
-    INT("int"), CHARS("java.lang.String"), BOOL("bool"), VOID("void");
+    INT("int"), FLOAT("float"), CHARS("java.lang.String"), BOOL("bool"),
+    VOID("void");
     public String name;
 
     TypeTag(String name) {

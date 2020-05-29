@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.example</groupId>
     <artifactId>red-knife-compiler</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.2-SNAPSHOT</version>
     <properties>
         <java-version>13</java-version>
         <logback-version>1.2.3</logback-version>
         <org.slf4j-version>1.7.25</org.slf4j-version>
-        <javassist-version>3.22.0-GA</javassist-version>
+        <javassist-version>3.27.0-GA</javassist-version>
     </properties>
     <build>
         <plugins>
@@ -56,6 +56,5 @@
             <artifactId>javassist</artifactId>
             <version>${javassist-version}</version>
         </dependency>
-
     </dependencies>
 </project>

@@ -35,7 +35,7 @@ public class Information {
 
     protected static void print(Context context) {
         RedKnifeBanner.printBanner();
-        log.info("Copyright(C) {}", Constants.COPYRIGHT);
+        log.info("Copyright (C) 2020-2030 {}", Constants.COPYRIGHT);
         log.info("Ignite documentation: {}", Constants.IGNITE_DOCUMENTATION);
         log.info("OS: {}", Constants.OS_NAME);
         log.info(String.format("JVM information: %s %s %s %s", Constants.JAVA_RUNTIME_TIME,

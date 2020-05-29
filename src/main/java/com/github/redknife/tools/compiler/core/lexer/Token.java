@@ -60,7 +60,7 @@ public class Token {
 
     public enum TokenKind {
         //@formatter:off
-        IDENTIFIER, INT("int"), INTLITERAL("0-9"), STRINGLITERAL("string"),
+        IDENTIFIER, INT("int"), INTLITERAL(), CHARSLITERAL(),
         TRUE("true"), FALSE("false"), BOOL("bool"), IF("if"),
         ELSE("else"), FOR("for"), LPAREN("("), RPAREN(")"),
         RBRACE("}"), LBRACKET("["), RBRACKET("]"), LBRACE("{"),
@@ -75,7 +75,8 @@ public class Token {
         SLASHEQ("/="), AMPEQ("&="), BAREQ("|="), CARETEQ("^="),
         PERCENTEQ("%="), LTLTEQ("<<="), GTGTEQ(">>="), GTGTGTEQ(">>>="),
         MONKEYS_AT("@"), RETURN("return"), SEMI(";"), VOID("void"),
-        CHARS("chars"), UNKNOWN();
+        CHARS("chars"), ANNOTATION("annotation"), FLOAT("float"), FLOATLITERAL(),
+        ANNOTATION_LEFT("/*"), ANNOTATION_RIGHT("*/"), UNKNOWN();
         //@formatter:on
         public String name;
 

@@ -127,6 +127,10 @@ public class Generate implements Visitor {
                         "System.out.println(value);" +
                         "}", ctClass);
                 ctClass.addMethod(method);
+                method = CtMethod.make("public static void println(float value){" +
+                        "System.out.println(value);" +
+                        "}", ctClass);
+                ctClass.addMethod(method);
                 method = CtMethod.make("public static void println(int value){" +
                         "System.out.println(value);" +
                         "}", ctClass);
@@ -136,6 +140,10 @@ public class Generate implements Visitor {
                         "}", ctClass);
                 ctClass.addMethod(method);
                 method = CtMethod.make("public static void print(String value){" +
+                        "System.out.print(value);" +
+                        "}", ctClass);
+                ctClass.addMethod(method);
+                method = CtMethod.make("public static void print(float value){" +
                         "System.out.print(value);" +
                         "}", ctClass);
                 ctClass.addMethod(method);
@@ -166,6 +174,12 @@ public class Generate implements Visitor {
                     break;
                 case CHARS:
                     name = "java.lang.String";
+                    break;
+                case INT:
+                    name = "int";
+                    break;
+                case FLOAT:
+                    name = "float";
                     break;
                 default:
                     name = type.name;

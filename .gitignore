@@ -4,4 +4,4 @@
 
 # for Maven
 logs
-red-knife-compiler/target/
+target

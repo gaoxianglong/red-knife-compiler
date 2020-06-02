@@ -16,6 +16,7 @@
 package com.github.redknife.tools.compiler.core.lexer;
 
 import com.github.redknife.tools.compiler.exceptions.ParseException;
+import com.github.redknife.tools.compiler.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -113,7 +114,7 @@ public class Scanner implements Lexer {
             nextChar();
             switch (ch) {
                 //@formatter:off
-                case ' ': case '\t': case LF: case CR:
+                case ' ': case '\t': case LF: case CR: case '\u0000':
                     break;
                 case 'A': case 'B': case 'C': case 'D': case 'E':
                 case 'F': case 'G': case 'H': case 'I': case 'J':
@@ -135,7 +136,7 @@ public class Scanner implements Lexer {
                     result = scanNumber(pos);
                     break loop;
                 case '\"':
-                    result = scanString(pos);
+                    result = scanChars(pos);
                     break loop;
                 case '[': case ']': case '(': case ')':case '.':
                 case ',': case '{': case '}': case ';':
@@ -148,9 +149,13 @@ public class Scanner implements Lexer {
                     }
                     break loop;
                 default:
-                    var token = scanOperator(pos);
-                    if (Objects.nonNull(token)) {
-                        result = token;
+                    if (Utils.isChinese(ch)) {
+                        result = scanIdent(pos);//标识符支持中文
+                    } else {
+                        var token = scanOperator(pos);
+                        if (Objects.nonNull(token)) {
+                            result = token;
+                        }
                     }
                     break loop;
             }
@@ -165,7 +170,7 @@ public class Scanner implements Lexer {
      * @return
      * @throws ParseException
      */
-    private Token scanString(int pos) throws ParseException {
+    private Token scanChars(int pos) throws ParseException {
         do {
             addMorpheme();
             nextChar();
@@ -205,14 +210,23 @@ public class Scanner implements Lexer {
                     }
             }
             addMorpheme();
-            var attribute = symbolTable.getAttribute(sbuf);
-            var tokenKind = getTokenKin(attribute.flag);
+            var tokenKind = getTokenKin(symbolTable.getAttribute(sbuf).flag);
             if (tokenKind == Token.TokenKind.IDENTIFIER) {
                 try {
                     sbuf = Arrays.copyOf(sbuf, sbuf.length - 1);
                     return getToken(pos);
                 } finally {
+                    sbuf = null;
                     prevChar();
+                }
+            } else if (tokenKind == Token.TokenKind.ANNOTATION) {//处理注释
+                try {
+                    do {
+                        nextChar();
+                        addMorpheme();
+                    } while (ch != CR && ch != LF && ch != EOI);
+                    return getToken(Token.TokenKind.ANNOTATION, pos);
+                } finally {
                     sbuf = null;
                 }
             }
@@ -234,16 +248,15 @@ public class Scanner implements Lexer {
                 case '0': case '1': case '2': case '3': case '4':
                 case '5': case '6': case '7': case '8': case '9':
                     break;
-                //@formatter:on
                 case '.':
-                    if (!isPoint) {
-                        isPoint = true;
-                        break;
-                    }
+                    isPoint = true;
+                    break;
+                //@formatter:on
                 default:
                     try {
                         return getToken(isPoint ? Token.TokenKind.FLOATLITERAL :
-                                Token.TokenKind.INTLITERAL, pos);
+                                isPoint ? Token.TokenKind.FLOATLITERAL :
+                                        Token.TokenKind.INTLITERAL, pos);
                     } finally {
                         prevChar();
                         sbuf = null;
@@ -282,6 +295,7 @@ public class Scanner implements Lexer {
                     break;
                 //@formatter:on
                 default:
+                    if (Utils.isChinese(ch)) break;
                     try {
                         return getToken(pos);
                     } finally {
@@ -397,7 +411,7 @@ public class Scanner implements Lexer {
     }
 
     public static void main(String[] agrs) throws ParseException {
-        String code = "sa = \"dd\"";
+        String code = "chars 啊;//测试";
         Scanner scanner = new Scanner(code.toCharArray()).init();
         while (true) {
             var token = scanner.nextToken();

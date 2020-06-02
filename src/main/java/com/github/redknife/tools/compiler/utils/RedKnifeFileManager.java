@@ -101,9 +101,10 @@ public class RedKnifeFileManager {
     public static char[] toArray(CharBuffer cb) {
         var src = cb.hasArray() ? ((CharBuffer) cb.compact().flip()).array() :
                 cb.toString().toCharArray();
-        var result = new char[src.length + 2];
-        System.arraycopy(src, 0, result, 1, result.length - 2);
+        var result = new char[src.length + 3];
+        System.arraycopy(src, 0, result, 1, src.length);
         result[0] = '{';
+        result[result.length - 2] = '\n';
         result[result.length - 1] = '}';
         return result;
     }

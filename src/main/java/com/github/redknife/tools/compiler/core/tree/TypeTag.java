@@ -24,8 +24,11 @@ package com.github.redknife.tools.compiler.core.tree;
  */
 public enum TypeTag {
     INT("int"), FLOAT("float"), CHARS("java.lang.String"), BOOL("bool"),
-    VOID("void");
+    VOID("void"), NO_TYPE;
     public String name;
+
+    TypeTag() {
+    }
 
     TypeTag(String name) {
         this.name = name;

@@ -47,4 +47,23 @@ public class Utils {
             strBuffer.delete(0, strBuffer.length());
         }
     }
+
+    /**
+     * 判断当前字符是否是中文字符
+     *
+     * @param cs
+     * @return
+     */
+    public static final boolean isChinese(char cs) {
+        Character.UnicodeBlock block = Character.UnicodeBlock.of(cs);
+        if (block == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS
+                || block == Character.UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS
+                || block == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A
+                || block == Character.UnicodeBlock.GENERAL_PUNCTUATION
+                || block == Character.UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION
+                || block == Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS) {
+            return true;
+        }
+        return false;
+    }
 }

@@ -75,8 +75,8 @@ public class Token {
         SLASHEQ("/="), AMPEQ("&="), BAREQ("|="), CARETEQ("^="),
         PERCENTEQ("%="), LTLTEQ("<<="), GTGTEQ(">>="), GTGTGTEQ(">>>="),
         MONKEYS_AT("@"), RETURN("return"), SEMI(";"), VOID("void"),
-        CHARS("chars"), ANNOTATION("annotation"), FLOAT("float"), FLOATLITERAL(),
-        ANNOTATION_LEFT("/*"), ANNOTATION_RIGHT("*/"), UNKNOWN();
+        CHARS("chars"), ANNOTATION("//"), FLOAT("float"), FLOATLITERAL(),
+        UNKNOWN();
         //@formatter:on
         public String name;
 

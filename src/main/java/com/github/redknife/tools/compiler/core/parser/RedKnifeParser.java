@@ -117,6 +117,11 @@ public class RedKnifeParser implements Parser {
                     result.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
                     var child = additive(begin);
                     if (Objects.nonNull(child)) {
+                        if (child instanceof Literal) {
+                            if (((Literal) child).getTypeTag() != TypeTag.CHARS) {
+                                error(begin);
+                            }
+                        }
                         result.getChilds().add(child);
                         nextToken();
                         if (isTokenKind(Token.TokenKind.SEMI)) {
@@ -166,6 +171,11 @@ public class RedKnifeParser implements Parser {
                     result.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
                     var child = additive(begin);
                     if (Objects.nonNull(child)) {
+                        if (child instanceof Literal) {
+                            if (((Literal) child).getTypeTag() != TypeTag.BOOL) {
+                                error(begin);
+                            }
+                        }
                         result.getChilds().add(child);
                         nextToken();
                         if (isTokenKind(Token.TokenKind.SEMI)) {
@@ -212,8 +222,13 @@ public class RedKnifeParser implements Parser {
                 nextToken();
                 if (isTokenKind(Token.TokenKind.EQ)) {
                     result.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
-                    var child = additive(begin);//解析二元表达式
+                    var child = additive(begin);
                     if (Objects.nonNull(child)) {
+                        if (child instanceof Literal) {
+                            if (((Literal) child).getTypeTag() != TypeTag.FLOAT) {
+                                error(begin);
+                            }
+                        }
                         result.getChilds().add(child);
                         nextToken();
                         if (isTokenKind(Token.TokenKind.SEMI)) {
@@ -263,6 +278,11 @@ public class RedKnifeParser implements Parser {
                     result.getChilds().add(new Other(Tree.Tag.NO_TAG, getMorpheme()));
                     var child = additive(begin);//解析二元表达式
                     if (Objects.nonNull(child)) {
+                        if (child instanceof Literal) {
+                            if (((Literal) child).getTypeTag() != TypeTag.INT) {
+                                error(begin);
+                            }
+                        }
                         result.getChilds().add(child);
                         nextToken();
                         if (isTokenKind(Token.TokenKind.SEMI)) {

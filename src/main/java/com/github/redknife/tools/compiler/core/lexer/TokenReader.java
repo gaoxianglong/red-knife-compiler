@@ -31,13 +31,21 @@ import java.util.Objects;
  */
 public class TokenReader {
     private Scanner lexer;
+
     public TokenReader init(CharBuffer cs) {
         lexer = new Scanner(RedKnifeFileManager.toArray(cs)).init();
         return this;
     }
 
     public Token nextToken() throws ParseException {
-        return lexer.nextToken();
+        Token result = null;
+        while (true) {
+            if ((result = lexer.nextToken()).tokenKind !=
+                    Token.TokenKind.ANNOTATION) {
+                break;
+            }
+        }
+        return result;
     }
 
     public void prevToken(int pos) {
